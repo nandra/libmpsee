@@ -16,7 +16,6 @@
 #include <ftdi.h>
 #endif
 
-#include "config.h"
 #include "mpsse.h"
 #include "support.h"
 
