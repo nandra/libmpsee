@@ -12,7 +12,8 @@
 
 /* Builds a block buffer for the Fast* functions. For internal use only. */
 int fast_build_block_buffer(struct mpsse_context *mpsse, uint8_t cmd,
-			    unsigned char *data, int size, int *buf_size) {
+    unsigned char *data, int size, int *buf_size)
+{
     int i = 0;
     uint16_t rsize = 0;
 
@@ -27,12 +28,11 @@ int fast_build_block_buffer(struct mpsse_context *mpsse, uint8_t cmd,
     fast_rw_buf[i++] = ((rsize >> 8) & 0xFF);
 
     /* On a write, copy the data to transmit after the command */
-    if ((cmd == mpsse->tx || cmd == mpsse->txrx) &&
-	(i + size) <= sizeof(fast_rw_buf)) {
-	memcpy(fast_rw_buf + i, data, size);
+    if ((cmd == mpsse->tx || cmd == mpsse->txrx) && (i + size) <= sizeof(fast_rw_buf)) {
+        memcpy(fast_rw_buf + i, data, size);
 
-	/* i == offset into buf */
-	i += size;
+        /* i == offset into buf */
+        i += size;
     }
 
     *buf_size = i;
@@ -49,36 +49,38 @@ int fast_build_block_buffer(struct mpsse_context *mpsse, uint8_t cmd,
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int FastWrite(struct mpsse_context *mpsse, char *data, int size) {
+int FastWrite(struct mpsse_context *mpsse, char *data, int size)
+{
     int buf_size = 0, txsize = 0, n = 0;
 
     if (is_valid_context(mpsse)) {
-	if (mpsse->mode) {
-	    while (n < size) {
-		txsize = size - n;
-		if (txsize > mpsse->xsize) {
-		    txsize = mpsse->xsize;
-		}
+        if (mpsse->mode) {
+            while (n < size) {
+                txsize = size - n;
+                if (txsize > mpsse->xsize) {
+                    txsize = mpsse->xsize;
+                }
 
-		if (fast_build_block_buffer(mpsse, mpsse->tx,
-					    (unsigned char *)(data + n), txsize,
-					    &buf_size) == MPSSE_OK) {
-		    if (raw_write(mpsse, fast_rw_buf, buf_size) == MPSSE_OK) {
-			n += txsize;
-		    } else {
-			return MPSSE_FAIL;
-			break;
-		    }
-		} else {
-		    return MPSSE_FAIL;
-		    break;
-		}
-	    }
+                if (fast_build_block_buffer(mpsse, mpsse->tx,
+                        (unsigned char *)(data + n), txsize,
+                        &buf_size)
+                    == MPSSE_OK) {
+                    if (raw_write(mpsse, fast_rw_buf, buf_size) == MPSSE_OK) {
+                        n += txsize;
+                    } else {
+                        return MPSSE_FAIL;
+                        break;
+                    }
+                } else {
+                    return MPSSE_FAIL;
+                    break;
+                }
+            }
 
-	    if (n == size) {
-		return MPSSE_OK;
-	    }
-	}
+            if (n == size) {
+                return MPSSE_OK;
+            }
+        }
     }
 
     return MPSSE_FAIL;
@@ -93,36 +95,37 @@ int FastWrite(struct mpsse_context *mpsse, char *data, int size) {
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int FastRead(struct mpsse_context *mpsse, char *data, int size) {
+int FastRead(struct mpsse_context *mpsse, char *data, int size)
+{
     int n = 0, rxsize = 0, data_size = 0;
 
     if (is_valid_context(mpsse)) {
-	if (mpsse->mode) {
-	    while (n < size) {
-		rxsize = size - n;
-		if (rxsize > mpsse->xsize) {
-		    rxsize = mpsse->xsize;
-		}
+        if (mpsse->mode) {
+            while (n < size) {
+                rxsize = size - n;
+                if (rxsize > mpsse->xsize) {
+                    rxsize = mpsse->xsize;
+                }
 
-		if (fast_build_block_buffer(mpsse, mpsse->rx, NULL, rxsize,
-					    &data_size) == MPSSE_OK) {
-		    if (raw_write(mpsse, fast_rw_buf, data_size) == MPSSE_OK) {
-			n += raw_read(mpsse, (unsigned char *)(data + n),
-				      rxsize);
-		    } else {
-			return MPSSE_FAIL;
-			break;
-		    }
-		} else {
-		    return MPSSE_FAIL;
-		    break;
-		}
-	    }
+                if (fast_build_block_buffer(mpsse, mpsse->rx, NULL, rxsize,
+                        &data_size)
+                    == MPSSE_OK) {
+                    if (raw_write(mpsse, fast_rw_buf, data_size) == MPSSE_OK) {
+                        n += raw_read(mpsse, (unsigned char *)(data + n), rxsize);
+                    } else {
+                        return MPSSE_FAIL;
+                        break;
+                    }
+                } else {
+                    return MPSSE_FAIL;
+                    break;
+                }
+            }
 
-	    if (n == size) {
-		return MPSSE_OK;
-	    }
-	}
+            if (n == size) {
+                return MPSSE_OK;
+            }
+        }
     }
 
     return MPSSE_FAIL;
@@ -139,40 +142,40 @@ int FastRead(struct mpsse_context *mpsse, char *data, int size) {
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
 int FastTransfer(struct mpsse_context *mpsse, char *wdata, char *rdata,
-		 int size) {
+    int size)
+{
     int n = 0, data_size = 0, rxsize = 0;
 
     if (is_valid_context(mpsse)) {
-	if (mpsse->mode >= SPI0 && mpsse->mode <= SPI3) {
-	    while (n < size) {
-		rxsize = size - n;
-		/* When sending and recieving, FTDI chips don't seem to like
-		 * large data
-		 * blocks. Limit the size of each block to SPI_TRANSFER_SIZE */
-		if (rxsize > SPI_TRANSFER_SIZE) {
-		    rxsize = SPI_TRANSFER_SIZE;
-		}
+        if (mpsse->mode >= SPI0 && mpsse->mode <= SPI3) {
+            while (n < size) {
+                rxsize = size - n;
+                /* When sending and recieving, FTDI chips don't seem to like
+         * large data
+         * blocks. Limit the size of each block to SPI_TRANSFER_SIZE */
+                if (rxsize > SPI_TRANSFER_SIZE) {
+                    rxsize = SPI_TRANSFER_SIZE;
+                }
 
-		if (build_block_buffer(mpsse, mpsse->txrx,
-				       (unsigned char *)(wdata + n), rxsize,
-				       &data_size) == MPSSE_OK) {
-		    if (raw_write(mpsse, fast_rw_buf, data_size) == MPSSE_OK) {
-			n += raw_read(mpsse, (unsigned char *)(rdata + n),
-				      rxsize);
-		    } else {
-			return MPSSE_FAIL;
-			break;
-		    }
-		} else {
-		    return MPSSE_FAIL;
-		    break;
-		}
-	    }
+                if (build_block_buffer(mpsse, mpsse->txrx, (unsigned char *)(wdata + n),
+                        rxsize, &data_size)
+                    == MPSSE_OK) {
+                    if (raw_write(mpsse, fast_rw_buf, data_size) == MPSSE_OK) {
+                        n += raw_read(mpsse, (unsigned char *)(rdata + n), rxsize);
+                    } else {
+                        return MPSSE_FAIL;
+                        break;
+                    }
+                } else {
+                    return MPSSE_FAIL;
+                    break;
+                }
+            }
 
-	    if (n == size) {
-		return MPSSE_OK;
-	    }
-	}
+            if (n == size) {
+                return MPSSE_OK;
+            }
+        }
     }
 
     return MPSSE_FAIL;

@@ -100,11 +100,11 @@ enum gpio_pins {
     GPIOH7 = 11
 };
 
-enum i2c_ack { ACK = 0, NACK = 1 };
+enum i2c_ack { ACK = 0,
+    NACK = 1 };
 
-#define DEFAULT_TRIS                                                           \
-    (SK | DO | CS | GPIO0 | GPIO1 | GPIO2 |                                    \
-     GPIO3) /* SK/DO/CS and GPIOs are outputs, DI is an input */
+#define DEFAULT_TRIS \
+    (SK | DO | CS | GPIO0 | GPIO1 | GPIO2 | GPIO3) /* SK/DO/CS and GPIOs are outputs, DI is an input */
 #define DEFAULT_PORT (SK | CS) /* SK and CS are high, all others low */
 
 enum mpsse_commands {
@@ -124,7 +124,8 @@ enum mpsse_commands {
     TRISTATE_IO = 0x9E,
 };
 
-enum low_bits_status { STARTED, STOPPED };
+enum low_bits_status { STARTED,
+    STOPPED };
 
 struct vid_pid {
     int vid;
@@ -160,12 +161,12 @@ struct mpsse_context {
 
 struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess);
 struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq,
-			   int endianess, int interface,
-			   const char *description, const char *serial);
+    int endianess, int interface,
+    const char *description, const char *serial);
 struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq,
-				int endianess, int interface,
-				const char *description, const char *serial,
-				int index);
+    int endianess, int interface,
+    const char *description, const char *serial,
+    int index);
 void Close(struct mpsse_context *mpsse);
 const char *ErrorString(struct mpsse_context *mpsse);
 int SetMode(struct mpsse_context *mpsse, int endianess);
@@ -212,7 +213,7 @@ unsigned char fast_rw_buf[SPI_RW_SIZE + CMD_SIZE];
 int FastWrite(struct mpsse_context *mpsse, char *data, int size);
 int FastRead(struct mpsse_context *mpsse, char *data, int size);
 int FastTransfer(struct mpsse_context *mpsse, char *wdata, char *rdata,
-		 int size);
+    int size);
 #endif
 
 #endif
