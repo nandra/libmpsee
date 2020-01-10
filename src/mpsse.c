@@ -528,7 +528,7 @@ int GetPid(struct mpsse_context *mpsse)
  */
 const char *GetDescription(struct mpsse_context *mpsse)
 {
-    char *description = NULL;
+    const char *description = NULL;
 
     if (is_valid_context(mpsse)) {
         description = mpsse->description;

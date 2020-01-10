@@ -125,11 +125,11 @@ enum low_bits_status { STARTED,
 struct vid_pid {
     int vid;
     int pid;
-    char *description;
+    const char *description;
 };
 
 struct mpsse_context {
-    char *description;
+    const char *description;
     struct ftdi_context ftdi;
     enum modes mode;
     enum low_bits_status status;
