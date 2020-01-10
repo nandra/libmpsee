@@ -8,11 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if LIBFTDI1 == 1
-#include <libftdi1/ftdi.h>
-#else
 #include <ftdi.h>
-#endif
 
 #include "mpsse.h"
 #include "support.h"
