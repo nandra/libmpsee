@@ -4,7 +4,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <mpsse.h>
+
+#include "mpsse.h"
 
 #define SIZE	0x8000		// Size of EEPROM chip (32KB)
 #define WCMD	"\xA0\x00\x00"	// Write start address command
