@@ -23,3 +23,16 @@ set_target_properties(libmpsse PROPERTIES
 
 # build examples
 add_subdirectory(examples)
+
+# testing
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rdparty/cmake-template/cmake/Modules")
+
+# cmocka
+option(ENABLE_TESTS "Perform unit tests after build" ON)
+if (ENABLE_TESTS)
+    find_package(CMocka CONFIG REQUIRED)
+    include(AddCMockaTest)
+    include(AddMockedTest)
+    add_subdirectory(test)
+    enable_testing()
+endif(ENABLE_TESTS)
