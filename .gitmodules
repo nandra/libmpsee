@@ -1,0 +1,3 @@
+[submodule "src/3rdparty/cmake-template"]
+	path = src/3rdparty/cmake-template
+	url = https://github.com/v3l0c1r4pt0r/cmake-template.git
