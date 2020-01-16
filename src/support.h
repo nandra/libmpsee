@@ -6,6 +6,7 @@
 int raw_write(struct mpsse_context *mpsse, unsigned char *buf, int size);
 int raw_read(struct mpsse_context *mpsse, unsigned char *buf, int size);
 void set_timeouts(struct mpsse_context *mpsse, int timeout);
+void get_timeouts(struct mpsse_context *mpsse, int *timeout);
 uint16_t freq2div(uint32_t system_clock, uint32_t freq);
 uint32_t div2freq(uint32_t system_clock, uint16_t div);
 unsigned char *build_block_buffer(struct mpsse_context *mpsse, uint8_t cmd,

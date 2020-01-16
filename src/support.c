@@ -68,6 +68,16 @@ void set_timeouts(struct mpsse_context *mpsse, int timeout)
     return;
 }
 
+void get_timeouts(struct mpsse_context *mpsse, int *timeout)
+{
+    if (mpsse->mode) {
+        // when we don't set both variables report error
+        *timeout = (mpsse->ftdi.usb_read_timeout == mpsse->ftdi.usb_write_timeout) ? mpsse->ftdi.usb_read_timeout : -1;
+    } else {
+        *timeout = -1;
+    }
+}
+
 /* Convert a frequency to a clock divisor */
 uint16_t freq2div(uint32_t system_clock, uint32_t freq)
 {
