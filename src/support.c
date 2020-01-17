@@ -18,6 +18,10 @@ int raw_write(struct mpsse_context *mpsse, unsigned char *buf, int size)
 {
     int retval = MPSSE_FAIL;
 
+    if (!is_valid_context(mpsse)) {
+        return retval;
+    }
+
     if (mpsse->mode) {
         if (ftdi_write_data(&mpsse->ftdi, buf, size) == size) {
             retval = MPSSE_OK;
@@ -31,6 +35,10 @@ int raw_write(struct mpsse_context *mpsse, unsigned char *buf, int size)
 int raw_read(struct mpsse_context *mpsse, unsigned char *buf, int size)
 {
     int n = 0, r = 0;
+
+    if (!is_valid_context(mpsse)) {
+        return MPSSE_FAIL;
+    }
 
     if (mpsse->mode) {
         while (n < size) {
@@ -60,6 +68,10 @@ int raw_read(struct mpsse_context *mpsse, unsigned char *buf, int size)
 /* Sets the read and write timeout periods for bulk usb data transfers. */
 void set_timeouts(struct mpsse_context *mpsse, int timeout)
 {
+    if (!is_valid(mpsse)) {
+        return;
+    }
+
     if (mpsse->mode) {
         mpsse->ftdi.usb_read_timeout = timeout;
         mpsse->ftdi.usb_write_timeout = timeout;
@@ -70,6 +82,11 @@ void set_timeouts(struct mpsse_context *mpsse, int timeout)
 
 void get_timeouts(struct mpsse_context *mpsse, int *timeout)
 {
+    if (!is_valid(mpsse)) {
+        *timeout = -1;
+        return;
+    }
+
     if (mpsse->mode) {
         // when we don't set both variables report error
         *timeout = (mpsse->ftdi.usb_read_timeout == mpsse->ftdi.usb_write_timeout) ? mpsse->ftdi.usb_read_timeout : -1;
@@ -101,6 +118,10 @@ unsigned char *build_block_buffer(struct mpsse_context *mpsse, uint8_t cmd,
     uint16_t rsize = 0;
 
     *buf_size = 0;
+
+    if (!is_valid_context(mpsse)) {
+        return NULL;
+    }
 
     /* Data block size is 1 in I2C, or when in bitmode */
     if (mpsse->mode == I2C || (cmd & MPSSE_BITMODE)) {
@@ -211,6 +232,10 @@ int set_bits_low(struct mpsse_context *mpsse, int port)
 {
     char buf[CMD_SIZE] = { 0 };
 
+    if (!is_valid_context(mpsse)) {
+        return MPSSE_FAIL;
+    }
+
     buf[0] = SET_BITS_LOW;
     buf[1] = port;
     buf[2] = mpsse->tris;
@@ -223,6 +248,10 @@ int set_bits_high(struct mpsse_context *mpsse, int port)
 {
     char buf[CMD_SIZE] = { 0 };
 
+    if (!is_valid_context(mpsse)) {
+        return MPSSE_FAIL;
+    }
+
     buf[0] = SET_BITS_HIGH;
     buf[1] = port;
     buf[2] = mpsse->trish;
@@ -234,6 +263,10 @@ int set_bits_high(struct mpsse_context *mpsse, int port)
 int gpio_write(struct mpsse_context *mpsse, int pin, int direction)
 {
     int retval = MPSSE_FAIL;
+
+    if (!is_valid_context(mpsse)) {
+        return retval;
+    }
 
     if (mpsse->mode == BITBANG) {
         if (direction == HIGH) {
@@ -275,18 +308,6 @@ int gpio_write(struct mpsse_context *mpsse, int pin, int direction)
 
             retval = set_bits_high(mpsse, mpsse->gpioh);
         }
-    }
-
-    return retval;
-}
-
-/* Checks if a given MPSSE context is valid. */
-int is_valid_context(struct mpsse_context *mpsse)
-{
-    int retval = 0;
-
-    if (mpsse != NULL && mpsse->open) {
-        retval = 1;
     }
 
     return retval;

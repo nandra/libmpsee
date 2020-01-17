@@ -14,6 +14,5 @@ unsigned char *build_block_buffer(struct mpsse_context *mpsse, uint8_t cmd,
 int set_bits_high(struct mpsse_context *mpsse, int port);
 int set_bits_low(struct mpsse_context *mpsse, int port);
 int gpio_write(struct mpsse_context *mpsse, int pin, int direction);
-int is_valid_context(struct mpsse_context *mpsse);
 
 #endif

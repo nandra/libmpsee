@@ -204,12 +204,10 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq,
  */
 void Close(struct mpsse_context *mpsse)
 {
-    if (mpsse) {
-        if (mpsse->open) {
-            ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
-            ftdi_usb_close(&mpsse->ftdi);
-            ftdi_deinit(&mpsse->ftdi);
-        }
+    if (is_valid_context(mpsse)) {
+        ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
+        ftdi_usb_close(&mpsse->ftdi);
+        ftdi_deinit(&mpsse->ftdi);
 
         free(mpsse);
         mpsse = NULL;
@@ -458,7 +456,7 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
  */
 const char *ErrorString(struct mpsse_context *mpsse)
 {
-    if (mpsse != NULL) {
+    if (is_valid(mpsse)) {
         return ftdi_get_error_string(&mpsse->ftdi);
     }
 
@@ -1210,4 +1208,16 @@ char Version(void)
     version = (char)((major << 4) + (minor & 0x0F));
 
     return version;
+}
+
+/* Checks if a given MPSSE context is valid + setup */
+int is_valid_context(struct mpsse_context *mpsse)
+{
+    return is_valid(mpsse) && mpsse->open;
+}
+
+/* check if valid context */
+int is_valid(struct mpsse_context *mpsse)
+{
+    return mpsse != NULL;
 }

@@ -155,6 +155,8 @@ struct mpsse_context {
 };
 
 struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess);
+int is_valid_context(struct mpsse_context *mpsse);
+int is_valid(struct mpsse_context *mpsse);
 struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq,
     int endianess, int interface,
     const char *description, const char *serial);

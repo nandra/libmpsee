@@ -46,9 +46,9 @@ static void test_context(void **state)
   struct mpsse_context *mpsse_ptr = NULL;
   struct mpsse_context mpsse;
 
-  assert_int_equal(is_valid_context(mpsse_ptr), 0);
+  assert_int_equal(is_valid(mpsse_ptr), 0);
 
-  assert_int_equal(is_valid_context(&mpsse), 0);
+  assert_int_equal(is_valid(&mpsse), 1);
 
   // context is valid only when we have object and it is opened
   mpsse.open = 1;
