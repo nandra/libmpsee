@@ -223,7 +223,7 @@ void Close(struct mpsse_context *mpsse)
  */
 void EnableBitmode(struct mpsse_context *mpsse, int tf)
 {
-    if (is_valid_context(mpsse)) {
+    if (is_valid(mpsse)) {
         if (tf) {
             mpsse->tx |= MPSSE_BITMODE;
             mpsse->rx |= MPSSE_BITMODE;
@@ -255,14 +255,13 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
     /* Do not call is_valid_context() here, as the FTDI chip may not be
    * completely
    * configured when SetMode is called */
-    if (mpsse) {
+    if (is_valid(mpsse)) {
         /* Read and write commands need to include endianess */
         mpsse->tx = MPSSE_DO_WRITE | endianess;
         mpsse->rx = MPSSE_DO_READ | endianess;
         mpsse->txrx = MPSSE_DO_WRITE | MPSSE_DO_READ | endianess;
 
-        /* Clock, data out, chip select pins are outputs; all others are inputs.
-     */
+        /* Clock, data out, chip select pins are outputs; all others are inputs.*/
         mpsse->tris = DEFAULT_TRIS;
 
         /* Clock and chip select pins idle high; all others are low */
@@ -391,8 +390,6 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
 
             retval = raw_write(mpsse, buf, i);
         }
-    } else {
-        retval = MPSSE_FAIL;
     }
 
     return retval;
@@ -474,7 +471,7 @@ int GetClock(struct mpsse_context *mpsse)
 {
     int clock = 0;
 
-    if (is_valid_context(mpsse)) {
+    if (is_valid(mpsse)) {
         clock = mpsse->clock;
     }
 
@@ -492,7 +489,7 @@ int GetVid(struct mpsse_context *mpsse)
 {
     int vid = 0;
 
-    if (is_valid_context(mpsse)) {
+    if (is_valid(mpsse)) {
         vid = mpsse->vid;
     }
 
@@ -510,7 +507,7 @@ int GetPid(struct mpsse_context *mpsse)
 {
     int pid = 0;
 
-    if (is_valid_context(mpsse)) {
+    if (is_valid(mpsse)) {
         pid = mpsse->pid;
     }
 
@@ -528,7 +525,7 @@ const char *GetDescription(struct mpsse_context *mpsse)
 {
     const char *description = NULL;
 
-    if (is_valid_context(mpsse)) {
+    if (is_valid(mpsse)) {
         description = mpsse->description;
     }
 
@@ -572,7 +569,7 @@ int SetLoopback(struct mpsse_context *mpsse, int enable)
  */
 void SetCSIdle(struct mpsse_context *mpsse, int idle)
 {
-    if (is_valid_context(mpsse)) {
+    if (is_valid(mpsse)) {
         if (idle > 0) {
             /* Chip select idles high, active low */
             mpsse->pidle |= CS;
@@ -601,7 +598,10 @@ void SetCSIdle(struct mpsse_context *mpsse, int idle)
  */
 void FlushAfterRead(struct mpsse_context *mpsse, int tf)
 {
-    mpsse->flush_after_read = tf;
+    if (is_valid(mpsse)) {
+        mpsse->flush_after_read = tf;
+    }
+
     return;
 }
 
@@ -621,8 +621,9 @@ int Start(struct mpsse_context *mpsse)
 
         if (mpsse->mode == I2C && mpsse->status == STARTED) {
             /* Set the default pin states while the clock is low since this is
-       * an I2C
-       * repeated start condition */
+         * an I2C
+         * repeated start condition
+         */
             status |= set_bits_low(mpsse, (mpsse->pidle & ~SK));
 
             /* Make sure the pins are in their default idle state */

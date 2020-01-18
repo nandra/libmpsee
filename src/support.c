@@ -18,7 +18,7 @@ int raw_write(struct mpsse_context *mpsse, unsigned char *buf, int size)
 {
     int retval = MPSSE_FAIL;
 
-    if (!is_valid_context(mpsse)) {
+    if (!is_valid(mpsse)) {
         return retval;
     }
 
@@ -36,7 +36,7 @@ int raw_read(struct mpsse_context *mpsse, unsigned char *buf, int size)
 {
     int n = 0, r = 0;
 
-    if (!is_valid_context(mpsse)) {
+    if (!is_valid(mpsse)) {
         return MPSSE_FAIL;
     }
 
