@@ -3,35 +3,35 @@
 from mpsse import *
 
 SIZE = 0x8000		# Size of EEPROM chip (32 KB)
-WCMD = "\xA0\x00\x00"	# Write start address command
+WCMD = "\xA0\x00\x00"	# write start address command
 RCMD = "\xA1"		# Read command
 FOUT = "eeprom.bin"	# Output file
 
 try:
 	eeprom = MPSSE(I2C, FOUR_HUNDRED_KHZ)
 
-	print "%s initialized at %dHz (I2C)" % (eeprom.GetDescription(), eeprom.GetClock())
+	print "%s initialized at %dHz (I2C)" % (eeprom.get_description(), eeprom.get_clock())
 
-	eeprom.Start()
-	eeprom.Write(WCMD)
+	eeprom.start()
+	eeprom.write_data(WCMD)
 
-	if eeprom.GetAck() == ACK:
+	if eeprom.get_ack(() == ACK:
 
-		eeprom.Start()
-		eeprom.Write(RCMD)
+		eeprom.start()
+		eeprom.write_data(RCMD)
 	
-		if eeprom.GetAck() == ACK:
-			data = eeprom.Read(SIZE)
-			eeprom.SendNacks()
-			eeprom.Read(1)
+		if eeprom.get_ack(() == ACK:
+			data = eeprom.read_data(SIZE)
+			eeprom.set_nacks(()
+			eeprom.read_data(1)
 		else:
 			raise Exception("Received read command NACK!")
 	else:
 		raise Exception("Received write command NACK!")
 
-	eeprom.Stop()
+	eeprom.stop()
 	
-	open(FOUT, "wb").write(data)	
+	open(FOUT, "wb").write_data(data)	
 	print "Dumped %d bytes to %s" % (len(data), FOUT)
 	
 	eeprom.Close()

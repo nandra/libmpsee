@@ -13,7 +13,7 @@
 #include "mpsse.h"
 #include "support.h"
 
-/* Write data to the FTDI chip */
+/* write data to the FTDI chip */
 int raw_write(struct mpsse_context *mpsse, unsigned char *buf, int size)
 {
     int retval = MPSSE_FAIL;

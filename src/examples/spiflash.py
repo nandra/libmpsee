@@ -23,14 +23,14 @@ class SPIFlash(object):
 			speed = FIFTEEN_MHZ
 	
 		self.flash = MPSSE(SPI0, speed, MSB)
-		self.chip = self.flash.GetDescription()
-		self.speed = self.flash.GetClock()
+		self.chip = self.flash.get_description()
+		self.speed = self.flash.get_clock()
 		self._init_gpio()
 
 	def _init_gpio(self):
 		# Set the GPIOL0 and GPIOL1 pins high for connection to SPI flash WP and HOLD pins.
-		self.flash.PinHigh(GPIOL0)
-		self.flash.PinHigh(GPIOL1)
+		self.flash.set_pin_high(GPIOL0)
+		self.flash.set_pin_high(GPIOL1)
 
 	def _addr2str(self, address):
         	addr_str = ""
@@ -40,47 +40,47 @@ class SPIFlash(object):
 
         	return addr_str[::-1]
 
-	def Read(self, count, address=0):
+	def read_data(self, count, address=0):
 		data = ''
 
-		self.flash.Start()
-		self.flash.Write(self.RCMD + self._addr2str(address))
-		data = self.flash.Read(count)
-		self.flash.Stop()
+		self.flash.start()
+		self.flash.write_data(self.RCMD + self._addr2str(address))
+		data = self.flash.read_data(count)
+		self.flash.stop()
 
 		return data
 
-	def Write(self, data, address=0):
+	def write_data(self, data, address=0):
 		count = 0
 
 		while count < len(data):
 
-			self.flash.Start()
-        		self.flash.Write(self.WECMD)
-        		self.flash.Stop()
+			self.flash.start()
+        		self.flash.write_data(self.WECMD)
+        		self.flash.stop()
 
-			self.flash.Start()
-			self.flash.Write(self.WCMD + self._addr2str(address) + data[address:address+self.BLOCK_SIZE])
-			self.flash.Stop()
+			self.flash.start()
+			self.flash.write_data(self.WCMD + self._addr2str(address) + data[address:address+self.BLOCK_SIZE])
+			self.flash.stop()
 
 			sleep(self.PP_PERIOD)
 			address += self.BLOCK_SIZE
 			count += self.BLOCK_SIZE
 
 	def Erase(self):
-		self.flash.Start()
-		self.flash.Write(self.WECMD)
-		self.flash.Stop()
+		self.flash.start()
+		self.flash.write_data(self.WECMD)
+		self.flash.stop()
 
-		self.flash.Start()
-		self.flash.Write(self.CECMD)
-		self.flash.Stop()
+		self.flash.start()
+		self.flash.write_data(self.CECMD)
+		self.flash.stop()
 
 	def ChipID(self):
-		self.flash.Start()
-		self.flash.Write(self.IDCMD)
-		chipid = self.flash.Read(self.IDLEN)
-		self.flash.Stop()
+		self.flash.start()
+		self.flash.write_data(self.IDCMD)
+		chipid = self.flash.read_data(self.IDLEN)
+		self.flash.stop()
 		return chipid
 
 	def Close(self):
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 		print "Usage: %s [OPTIONS]" % sys.argv[0]
 		print ""
 		print "\t-r, --read=<file>      Read data from the chip to file"
-		print "\t-w, --write=<file>     Write data from file to the chip"
+		print "\t-w, --write=<file>     write data from file to the chip"
 		print "\t-s, --size=<int>       Set the size of data to read/write"
 		print "\t-a, --address=<int>    Set the starting address for the read/write operation [0]"
 		print "\t-f, --frequency=<int>  Set the SPI clock frequency, in hertz [15,000,000]"
@@ -179,10 +179,10 @@ if __name__ == "__main__":
 				print "Please specify an output file and read size!"
 				usage()
 			
-			sys.stdout.write("Reading %d bytes starting at address 0x%X..." % (size, address))
+			sys.stdout.write_data("Reading %d bytes starting at address 0x%X..." % (size, address))
 			sys.stdout.flush()
-			data = spi.Read(size, address)
-			open(fname, 'wb').write(data)
+			data = spi.read_data(size, address)
+			open(fname, 'wb').write_data(data)
 			print "saved to %s." % fname
 		
 		elif action == "write":
@@ -194,9 +194,9 @@ if __name__ == "__main__":
 			if not size:
 				size = len(data)
 
-			sys.stdout.write("Writing %d bytes from %s to the chip starting at address 0x%X..." % (size, fname, address))
+			sys.stdout.write_data("Writing %d bytes from %s to the chip starting at address 0x%X..." % (size, fname, address))
 			sys.stdout.flush()
-			spi.Write(data[0:size], address)
+			spi.write_data(data[0:size], address)
 			print "done."
 
 		elif action == "id":
@@ -208,16 +208,16 @@ if __name__ == "__main__":
 		elif action == "erase":
 			
 			data = "\xFF" * size
-			sys.stdout.write("Erasing entire chip...")
+			sys.stdout.write_data("Erasing entire chip...")
 			sys.stdout.flush()
 			spi.Erase()
 			print "done."
 
 		if verify and data:
-			sys.stdout.write("Verifying...")
+			sys.stdout.write_data("Verifying...")
 			sys.stdout.flush()
 
-			vdata = spi.Read(size, address)
+			vdata = spi.read_data(size, address)
 			if vdata == data:
 				if data == ("\xFF" * size):
 					print "chip is blank."

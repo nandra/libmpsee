@@ -67,7 +67,7 @@ class MPSSE(object):
 		if mode is not None:
 			self.context = _mpsse.MPSSE(mode, frequency, endianess)
 			if self.context.open == 0:
-				raise Exception, self.ErrorString()
+				raise Exception, self.error_string()
 
 	def __enter__(self):
 		return self
@@ -100,7 +100,7 @@ class MPSSE(object):
 		"""
 		self.context = _mpsse.OpenIndex(vid, pid, mode, frequency, endianess, interface, description, serial, index)
 		if self.context.open == 0:
-			raise Exception, self.ErrorString()
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
 	def Close(self):
@@ -112,13 +112,13 @@ class MPSSE(object):
 		retval = _mpsse.Close(self.context)
 		self.context = None
 	
-	def ErrorString(self):
+	def error_string(self):
 		"""
 		Returns the last libftdi error string.
 		"""
-		return _mpsse.ErrorString(self.context)
+		return _mpsse.error_string(self.context)
 
-	def SetMode(self, mode, endianess):
+	def set_mode(self, mode, endianess):
 		"""
 		Sets the appropriate transmit and receive commands based on the requested mode and byte order.
 		Called internally by __init__ and Open.
@@ -129,22 +129,22 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.SetMode(self.context, mode, endianess) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.set_mode(self.context, mode, endianess) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def EnableBitmode(self, tf):
+	def enable_bit_mode(self, tf):
 		"""
 		Enables/disables bitwise data transfers.
-		Called internally by ReadBits and WriteBites.
+		Called internally by read_bits and WriteBites.
 
 		@tf - Set to 1 to enable bitwise transfers, 0 to disable.
 
 		Returns None.
 		"""
-		_mpsse.EnableBitmode(self.context, tf)
+		_mpsse.enable_bit_mode(self.context, tf)
 
-	def FlushAfterRead(self, tf):
+	def flush_after_read(self, tf):
 		"""
 		Enables / disables the explicit flushing of the recieve buffer after each read operation.
 
@@ -152,9 +152,9 @@ class MPSSE(object):
 
 		Returns None.
 		"""
-		return _mpsse.FlushAfterRead(self.context, tf)
+		return _mpsse.flush_after_read(self.context, tf)
 
-	def SetClock(self, frequency):
+	def set_clock(self, frequency):
 		"""
 		Sets the appropriate divisor for the desired clock frequency.
 		Called internally by __init__ and Open.
@@ -164,36 +164,36 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.SetClock(self.context, frequency) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.set_clock(self.context, frequency) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def GetClock(self):
+	def get_clock(self):
 		"""
 		Returns the currently configured clock rate, in hertz.
 		"""
-		return _mpsse.GetClock(self.context)
+		return _mpsse.get_clock(self.context)
 
-	def GetVid(self):
+	def get_vid(self):
 		"""
 		Returns the vendor ID of the FTDI chip.
 		"""
-		return _mpsse.GetVid(self.context)
+		return _mpsse.get_vid(self.context)
 
-	def GetPid(self):
+	def get_pid(self):
 		"""
 		Returns the product ID of the FTDI chip.
 		"""
-		return _mpsse.GetPid(self.context)
+		return _mpsse.get_pid(self.context)
 
-	def GetDescription(self):
+	def get_description(self):
 		"""
 		Returns the description of the FTDI chip, if any. 
 		This will only be populated if __init__ was used to open the device.
 		"""
-		return _mpsse.GetDescription(self.context)
+		return _mpsse.get_description(self.context)
 
-	def SetLoopback(self, enable):
+	def set_loopback(self, enable):
 		"""
 		Enable / disable internal loopback. Loopback is disabled by default.
 
@@ -202,11 +202,11 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.SetLoopback(self.context, enable) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.set_loopback(self.context, enable) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def SetCSIdle(self, idle):
+	def set_cs_idle(self, idle):
 		"""
 		Sets the idle state of the chip select pin.
 
@@ -214,31 +214,31 @@ class MPSSE(object):
 
 		Returns None.
 		"""
-		_mpsse.SetCSIdle(self.context, idle)
+		_mpsse.set_cs_idle(self.context, idle)
 
-	def Start(self):
+	def start(self):
 		"""
 		Send data start condition.
 
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.Start(self.context) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.start(self.context) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def Stop(self):
+	def stop(self):
 		"""
 		Send data stop condition.
 
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.Stop(self.context) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.stop(self.context) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def Write(self, data):
+	def write_data(self, data):
 		"""
 		Writes bytes out via the selected serial protocol.
 		
@@ -247,11 +247,11 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.Write(self.context, data) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.write_data(self.context, data) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def Read(self, size):
+	def read_data(self, size):
 		"""
 		Reads bytes over the selected serial protocol.
 
@@ -259,9 +259,9 @@ class MPSSE(object):
 
 		Returns a string of size bytes.
 		"""
-		return _mpsse.Read(self.context, size)
+		return _mpsse.read_data(self.context, size)
 
-	def Transfer(self, data):
+	def transfer(self, data):
 		"""
 		Transfers data over the selected serial protocol.
 		For use only in SPI0, SPI1, SPI2, SPI3 modes.
@@ -270,9 +270,9 @@ class MPSSE(object):
 
 		Returns a string of len(data) bytes.
 		"""
-		return _mpsse.Transfer(self.context, data)
+		return _mpsse.transfer(self.context, data)
 
-	def SetAck(self, ack):
+	def set_ack((self, ack):
 		"""
 		Sets the transmitted ACK bit.
 		For use only in I2C mode.
@@ -281,33 +281,33 @@ class MPSSE(object):
 
 		Returns None.
 		"""
-		_mpsse.SetAck(self.context, ack)
+		_mpsse.set_ack((self.context, ack)
 
-	def SendAcks(self):
+	def set_acks(self):
 		"""
 		Causes all subsequent I2C read operations to respond with an acknowledgement.
 
 		Returns None.
 		"""
-		_mpsse.SendAcks(self.context)
+		_mpsse.set_acks(self.context)
 
-	def SendNacks(self):
+	def set_nacks((self):
 		"""
 		Causes all subsequent I2C read operations to respond with a no-acknowledgement.
 
 		Returns None.
 		"""
-		return _mpsse.SendNacks(self.context)
+		return _mpsse.set_nacks((self.context)
 
-	def GetAck(self):
+	def get_ack((self):
 		"""
 		Returns the last received ACK bit.
 
 		Returns one of: ACK, NACK.
 		"""
-		return _mpsse.GetAck(self.context)
+		return _mpsse.get_ack((self.context)
 
-	def PinHigh(self, pin):
+	def set_pin_high(self, pin):
 		"""
 		Sets the specified GPIO pin high.
 		
@@ -317,11 +317,11 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.PinHigh(self.context, pin) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.set_pin_high(self.context, pin) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def PinLow(self, pin):
+	def set_pin_low(self, pin):
 		"""
 		Sets the specified GPIO pin low.
 		
@@ -331,11 +331,11 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.PinLow(self.context, pin) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.set_pin_low(self.context, pin) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def SetDirection(self, direction):
+	def set_direction(self, direction):
 		"""
 		Sets the input/output direction of pins as determined by direction (1 = Output, 0 = Input). 
 		For use in BITBANG mode only.
@@ -345,11 +345,11 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.SetDirection(self.context, direction) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.set_direction(self.context, direction) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def WriteBits(self, bits, n):
+	def write_bits(self, bits, n):
 		"""
 		Performs a bitwise write of up to 8 bits at a time.
 		
@@ -359,11 +359,11 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.WriteBits(self.context, bits, n) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.write_bits(self.context, bits, n) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def ReadBits(self, n):
+	def read_bits(self, n):
 		"""
 		Performs a bitwise read of up to 8 bits at a time.
 
@@ -371,9 +371,9 @@ class MPSSE(object):
 
 		Returns an integer value with the read bits set.
 		"""
-		return ord(_mpsse.ReadBits(self.context, n))
+		return ord(_mpsse.read_bits(self.context, n))
 
-	def WritePins(self, data):
+	def write_pins(self, data):
 		"""
 		Writes a new state to the chip's pins.
 		For use in BITBANG mode only.
@@ -383,40 +383,40 @@ class MPSSE(object):
 		Returns MPSSE_OK on success.
 		Raises an exception on failure.
 		"""
-		if _mpsse.WritePins(self.context, data) == MPSSE_FAIL:
-			raise Exception, self.ErrorString()
+		if _mpsse.write_pins(self.context, data) == MPSSE_FAIL:
+			raise Exception, self.error_string()
 		return MPSSE_OK
 
-	def ReadPins(self):
+	def read_pins(self):
 		"""
 		Reads the current state of the chip's pins.
 		For use in BITBANG mode only.
 
 		Returns an integer with the corresponding pin's bits set.
 		"""
-		return _mpsse.ReadPins(self.context)
+		return _mpsse.read_pins(self.context)
 
-	def PinState(self, pin, state=-1):
+	def pin_state(self, pin, state=-1):
 		"""
 		Checks the current state of the pins.
 		For use in BITBANG mode only.
 
 		@pin   - The pin number whose state you want to check. 
-		@state - The value returned by ReadPins. If not specified, ReadPins will be called automatically.
+		@state - The value returned by read_pins. If not specified, read_pins will be called automatically.
 
 		Returns a 1 if the pin is high, 0 if the pin is low.
 		"""
-		return _mpsse.PinState(self.context, pin, state)
+		return _mpsse.pin_state(self.context, pin, state)
 
-	def Tristate(self):
+	def set_tristate(self):
 		"""
 		Puts all I/O pins into a tristate mode (FT232H only).
 		"""
-		return _mpsse.Tristate(self.context)
+		return _mpsse.set_tristate(self.context)
 
-	def Version(self):
+	def version(self):
 		"""
 		Returns the libmpsse version number.
 		High nibble is major, low nibble is minor.
 		"""
-		return _mpsse.Version()
+		return _mpsse.version()

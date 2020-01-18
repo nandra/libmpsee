@@ -154,45 +154,45 @@ struct mpsse_context {
     uint8_t rack;
 };
 
-struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess);
+struct mpsse_context *mpsse_init(enum modes mode, int freq, int endianess);
 int is_valid_context(struct mpsse_context *mpsse);
 int is_valid(struct mpsse_context *mpsse);
-struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq,
+struct mpsse_context *open(int vid, int pid, enum modes mode, int freq,
     int endianess, int interface,
     const char *description, const char *serial);
-struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq,
+struct mpsse_context *open_index(int vid, int pid, enum modes mode, int freq,
     int endianess, int interface,
     const char *description, const char *serial,
     int index);
-void Close(struct mpsse_context *mpsse);
-const char *ErrorString(struct mpsse_context *mpsse);
-int SetMode(struct mpsse_context *mpsse, int endianess);
-void EnableBitmode(struct mpsse_context *mpsse, int tf);
-int SetClock(struct mpsse_context *mpsse, uint32_t freq);
-int GetClock(struct mpsse_context *mpsse);
-int GetVid(struct mpsse_context *mpsse);
-int GetPid(struct mpsse_context *mpsse);
-const char *GetDescription(struct mpsse_context *mpsse);
-int SetLoopback(struct mpsse_context *mpsse, int enable);
-void SetCSIdle(struct mpsse_context *mpsse, int idle);
-int Start(struct mpsse_context *mpsse);
-int Write(struct mpsse_context *mpsse, char *data, int size);
-int Stop(struct mpsse_context *mpsse);
-int GetAck(struct mpsse_context *mpsse);
-void SetAck(struct mpsse_context *mpsse, int ack);
-void SendAcks(struct mpsse_context *mpsse);
-void SendNacks(struct mpsse_context *mpsse);
-void FlushAfterRead(struct mpsse_context *mpsse, int tf);
-int PinHigh(struct mpsse_context *mpsse, int pin);
-int PinLow(struct mpsse_context *mpsse, int pin);
-int SetDirection(struct mpsse_context *mpsse, uint8_t direction);
-int WriteBits(struct mpsse_context *mpsse, char bits, int size);
-char ReadBits(struct mpsse_context *mpsse, int size);
-int WritePins(struct mpsse_context *mpsse, uint8_t data);
-int ReadPins(struct mpsse_context *mpsse);
-int PinState(struct mpsse_context *mpsse, int pin, int state);
-int Tristate(struct mpsse_context *mpsse);
-char Version(void);
+void release(struct mpsse_context *mpsse);
+const char *error_string(struct mpsse_context *mpsse);
+int set_mode(struct mpsse_context *mpsse, int endianess);
+void enable_bit_mode(struct mpsse_context *mpsse, int tf);
+int set_clock(struct mpsse_context *mpsse, uint32_t freq);
+int get_clock(struct mpsse_context *mpsse);
+int get_vid(struct mpsse_context *mpsse);
+int get_pid(struct mpsse_context *mpsse);
+const char *get_description(struct mpsse_context *mpsse);
+int set_loopback(struct mpsse_context *mpsse, int enable);
+void set_cs_idle(struct mpsse_context *mpsse, int idle);
+int start(struct mpsse_context *mpsse);
+int write_data(struct mpsse_context *mpsse, char *data, int size);
+int stop(struct mpsse_context *mpsse);
+int get_ack(struct mpsse_context *mpsse);
+void set_ack(struct mpsse_context *mpsse, int ack);
+void set_acks(struct mpsse_context *mpsse);
+void set_nacks(struct mpsse_context *mpsse);
+void flush_after_read(struct mpsse_context *mpsse, int tf);
+int set_pin_high(struct mpsse_context *mpsse, int pin);
+int set_pin_low(struct mpsse_context *mpsse, int pin);
+int set_direction(struct mpsse_context *mpsse, uint8_t direction);
+int write_bits(struct mpsse_context *mpsse, char bits, int size);
+char read_bits(struct mpsse_context *mpsse, int size);
+int write_pins(struct mpsse_context *mpsse, uint8_t data);
+int read_pins(struct mpsse_context *mpsse);
+int pin_state(struct mpsse_context *mpsse, int pin, int state);
+int set_tristate(struct mpsse_context *mpsse);
+char version(void);
 
 #ifdef SWIGPYTHON
 typedef struct swig_string_data {
@@ -200,11 +200,11 @@ typedef struct swig_string_data {
     char *data;
 } swig_string_data;
 
-swig_string_data Read(struct mpsse_context *mpsse, int size);
-swig_string_data Transfer(struct mpsse_context *mpsse, char *data, int size);
+swig_string_data read_data(struct mpsse_context *mpsse, int size);
+swig_string_data transfer(struct mpsse_context *mpsse, char *data, int size);
 #else
-char *Read(struct mpsse_context *mpsse, int size);
-char *Transfer(struct mpsse_context *mpsse, char *data, int size);
+char *read_data(struct mpsse_context *mpsse, int size);
+char *transfer(struct mpsse_context *mpsse, char *data, int size);
 
 unsigned char fast_rw_buf[SPI_RW_SIZE + CMD_SIZE];
 int FastWrite(struct mpsse_context *mpsse, char *data, int size);

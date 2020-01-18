@@ -1,18 +1,18 @@
 Libmpsse supports toggling the FTDI chip's GPIO pins in SPI, I2C and GPIO modes.
 
-This is done via the PinHigh and PinLow functions, which set the specified pin high or low respectively:
+This is done via the set_pin_high and set_pin_low functions, which set the specified pin high or low respectively:
 
 	gpio = MPSSE(GPIO)
-	gpio.PinHigh(GPIOL0)
-	gpio.PinLow(GPIOH1)
+	gpio.set_pin_high(GPIOL0)
+	gpio.set_pin_low(GPIOH1)
 	gpio.Close()
 
-The state of the first four GPIO pins (GPIOL0 - GPIOL3) can also be read using the ReadPins or PinState
+The state of the first four GPIO pins (GPIOL0 - GPIOL3) can also be read using the read_pins or pin_state
 functions. Note that unlike in BITBANG mode, you should specify the appropriate GPIOLx definition for the
 GPIOL pin you wish to read, rather than the absolute pin number:
 
 	gpio = MPSSE(GPIO)
-	print "GPIOL0 State:", gpio.PinState(GPIOL0)
+	print "GPIOL0 State:", gpio.pin_state(GPIOL0)
 	gpio.Close()
 
 The following GPIO pins are defined by libmpsse:
@@ -31,6 +31,6 @@ The following GPIO pins are defined by libmpsse:
 	GPIOH6
 	GPIOH7
 
-It should be noted that when in SPI or I2C modes, the GPIOL pins can only be set before a Start() or after 
-a Stop(); that is, they cannot be set in between calls to the Start() and Stop() functions. The GPIOH pins
+It should be noted that when in SPI or I2C modes, the GPIOL pins can only be set before a start() or after 
+a stop(); that is, they cannot be set in between calls to the start() and stop() functions. The GPIOH pins
 can be set at any time.

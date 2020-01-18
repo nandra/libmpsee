@@ -10,23 +10,23 @@ int main(void)
 	int sec = 0, min = 0, retval = EXIT_FAILURE;
 	char *control = NULL, *seconds = NULL, *minutes = NULL;
 	
-	if((ds1305 = MPSSE(SPI3, ONE_HUNDRED_KHZ, MSB)) != NULL && ds1305->open)
+	if((ds1305 = mpsse_init(SPI3, ONE_HUNDRED_KHZ, MSB)) != NULL && ds1305->open)
 	{
-		SetCSIdle(ds1305, 0);
+		set_cs_idle(ds1305, 0);
 
-		printf("%s initialized at %dHz (SPI mode 3)\n", GetDescription(ds1305), GetClock(ds1305));
+		printf("%s initialized at %dHz (SPI mode 3)\n", get_description(ds1305), get_clock(ds1305));
 		
-		Start(ds1305);
-		Write(ds1305, "\x0F", 1);
-		control = Read(ds1305, 1);
-		Stop(ds1305);
+		start(ds1305);
+		write_data(ds1305, "\x0F", 1);
+		control = read_data(ds1305, 1);
+		stop(ds1305);
 		
 		control[0] &= ~0x80;
 		
-		Start(ds1305);
-		Write(ds1305, "\x8F", 1);
-		Write(ds1305, control, 1);
-		Stop(ds1305);
+		start(ds1305);
+		write_data(ds1305, "\x8F", 1);
+		write_data(ds1305, control, 1);
+		stop(ds1305);
 
 		free(control);
 
@@ -34,17 +34,17 @@ int main(void)
 		{
 			sleep(1);
 
-			Start(ds1305);
-			Write(ds1305, "\x00", 1);
-			seconds = Read(ds1305, 1);
-			Stop(ds1305);
+			start(ds1305);
+			write_data(ds1305, "\x00", 1);
+			seconds = read_data(ds1305, 1);
+			stop(ds1305);
 
 			sec = (((seconds[0] >> 4) * 10) + (seconds[0] & 0x0F));
 
-			Start(ds1305);
-			Write(ds1305, "\x01", 1);
-			minutes = Read(ds1305, 1);
-			Stop(ds1305);
+			start(ds1305);
+			write_data(ds1305, "\x01", 1);
+			minutes = read_data(ds1305, 1);
+			stop(ds1305);
 
 			min = (((minutes[0] >> 4) * 10) + (minutes[0] & 0x0F));
 
@@ -56,10 +56,10 @@ int main(void)
 	}
 	else
 	{
-		printf("Failed to initialize MPSSE: %s\n", ErrorString(ds1305));
+		printf("Failed to initialize MPSSE: %s\n", error_string(ds1305));
 	}
 
-	Close(ds1305);
+	release(ds1305);
 
 	return retval;
 }

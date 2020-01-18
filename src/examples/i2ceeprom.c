@@ -8,7 +8,7 @@
 #include "mpsse.h"
 
 #define SIZE	0x8000		// Size of EEPROM chip (32KB)
-#define WCMD	"\xA0\x00\x00"	// Write start address command
+#define WCMD	"\xA0\x00\x00"	// write start address command
 #define RCMD	"\xA1"		// Read command
 #define FOUT	"eeprom.bin"	// Output file
 
@@ -19,24 +19,24 @@ int main(void)
 	int retval = EXIT_FAILURE;
 	struct mpsse_context *eeprom = NULL;
 
-	if((eeprom = MPSSE(I2C, FOUR_HUNDRED_KHZ, MSB)) != NULL && eeprom->open)
+	if((eeprom = mpsse_init(I2C, FOUR_HUNDRED_KHZ, MSB)) != NULL && eeprom->open)
 	{
-		printf("%s initialized at %dHz (I2C)\n", GetDescription(eeprom), GetClock(eeprom));
+		printf("%s initialized at %dHz (I2C)\n", get_description(eeprom), get_clock(eeprom));
 	
-		/* Write the EEPROM start address */	
-		Start(eeprom);
-		Write(eeprom, WCMD, sizeof(WCMD) - 1);
+		/* write the EEPROM start address */	
+		start(eeprom);
+		write_data(eeprom, WCMD, sizeof(WCMD) - 1);
 
-		if(GetAck(eeprom) == ACK)
+		if(get_ack(eeprom) == ACK)
 		{
 			/* Send the EEPROM read command */
-			Start(eeprom);
-			Write(eeprom, RCMD, sizeof(RCMD) - 1);
+			start(eeprom);
+			write_data(eeprom, RCMD, sizeof(RCMD) - 1);
 
-			if(GetAck(eeprom) == ACK)
+			if(get_ack(eeprom) == ACK)
 			{
 				/* Read in SIZE bytes from the EEPROM chip */
-				data = Read(eeprom, SIZE);
+				data = read_data(eeprom, SIZE);
 				if(data)
 				{
 					fp = fopen(FOUT, "wb");
@@ -53,21 +53,21 @@ int main(void)
 				}
 	
 				/* Tell libmpsse to send NACKs after reading data */
-				SendNacks(eeprom);
+				set_nacks(eeprom);
 
 				/* Read in one dummy byte, with a NACK */
-				Read(eeprom, 1);
+				read_data(eeprom, 1);
 			}
 		}
 
-		Stop(eeprom);
+		stop(eeprom);
 	}
 	else
 	{
-		printf("Failed to initialize MPSSE: %s\n", ErrorString(eeprom));
+		printf("Failed to initialize MPSSE: %s\n", error_string(eeprom));
 	}
 
-	Close(eeprom);
+	release(eeprom);
 
 	return retval;
 }

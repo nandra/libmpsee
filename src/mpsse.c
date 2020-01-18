@@ -42,13 +42,13 @@ struct vid_pid supported_devices[] = {
  * On success, mpsse->open will be set to 1.
  * On failure, mpsse->open will be set to 0.
  */
-struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
+struct mpsse_context *mpsse_init(enum modes mode, int freq, int endianess)
 {
     int i = 0;
     struct mpsse_context *mpsse = NULL;
 
     for (i = 0; supported_devices[i].vid != 0; i++) {
-        if ((mpsse = Open(supported_devices[i].vid, supported_devices[i].pid, mode,
+        if ((mpsse = open(supported_devices[i].vid, supported_devices[i].pid, mode,
                  freq, endianess, IFACE_A, NULL, NULL))
             != NULL) {
             if (mpsse->open) {
@@ -59,7 +59,7 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
          pointer
          and try again */
             else if (supported_devices[i + 1].vid != 0) {
-                Close(mpsse);
+                release(mpsse);
                 mpsse = NULL;
             }
         }
@@ -84,11 +84,11 @@ struct mpsse_context *MPSSE(enum modes mode, int freq, int endianess)
  * On success, mpsse->open will be set to 1.
  * On failure, mpsse->open will be set to 0.
  */
-struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq,
+struct mpsse_context *open(int vid, int pid, enum modes mode, int freq,
     int endianess, int interface,
     const char *description, const char *serial)
 {
-    return OpenIndex(vid, pid, mode, freq, endianess, interface, description,
+    return open_index(vid, pid, mode, freq, endianess, interface, description,
         serial, 0);
 }
 
@@ -109,7 +109,7 @@ struct mpsse_context *Open(int vid, int pid, enum modes mode, int freq,
  * On success, mpsse->open will be set to 1.
  * On failure, mpsse->open will be set to 0.
  */
-struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq,
+struct mpsse_context *open_index(int vid, int pid, enum modes mode, int freq,
     int endianess, int interface,
     const char *description, const char *serial,
     int index)
@@ -122,7 +122,7 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq,
         memset(mpsse, 0, sizeof(struct mpsse_context));
 
         /* Legacy; flushing is no longer needed, so disable it by default. */
-        FlushAfterRead(mpsse, 0);
+        flush_after_read(mpsse, 0);
 
         /* ftdilib initialization */
         if (ftdi_init(&mpsse->ftdi) == 0) {
@@ -160,8 +160,8 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq,
                     if (mpsse->mode != BITBANG) {
                         ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_MPSSE);
 
-                        if (SetClock(mpsse, freq) == MPSSE_OK) {
-                            if (SetMode(mpsse, endianess) == MPSSE_OK) {
+                        if (set_clock(mpsse, freq) == MPSSE_OK) {
+                            if (set_mode(mpsse, endianess) == MPSSE_OK) {
                                 mpsse->open = 1;
 
                                 /* Give the chip a few mS to initialize */
@@ -169,7 +169,7 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq,
 
                                 /*
                  * Not all FTDI chips support all the commands
-                 * that SetMode may
+                 * that set_mode may
                  * have sent.
                  * This clears out any errors from unsupported
                  * commands that
@@ -202,7 +202,7 @@ struct mpsse_context *OpenIndex(int vid, int pid, enum modes mode, int freq,
  *
  * Returns void.
  */
-void Close(struct mpsse_context *mpsse)
+void release(struct mpsse_context *mpsse)
 {
     if (is_valid_context(mpsse)) {
         ftdi_set_bitmode(&mpsse->ftdi, 0, BITMODE_RESET);
@@ -221,7 +221,7 @@ void Close(struct mpsse_context *mpsse)
  *
  * Returns void.
  */
-void EnableBitmode(struct mpsse_context *mpsse, int tf)
+void enable_bit_mode(struct mpsse_context *mpsse, int tf)
 {
     if (is_valid(mpsse)) {
         if (tf) {
@@ -246,7 +246,7 @@ void EnableBitmode(struct mpsse_context *mpsse, int tf)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int SetMode(struct mpsse_context *mpsse, int endianess)
+int set_mode(struct mpsse_context *mpsse, int endianess)
 {
     int retval = MPSSE_OK, i = 0, setup_commands_size = 0;
     unsigned char buf[CMD_SIZE] = { 0 };
@@ -254,7 +254,7 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
 
     /* Do not call is_valid_context() here, as the FTDI chip may not be
    * completely
-   * configured when SetMode is called */
+   * configured when set_mode is called */
     if (is_valid(mpsse)) {
         /* Read and write commands need to include endianess */
         mpsse->tx = MPSSE_DO_WRITE | endianess;
@@ -271,10 +271,10 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
         mpsse->pstart &= ~CS;
 
         /* Disable FTDI internal loopback */
-        SetLoopback(mpsse, 0);
+        set_loopback(mpsse, 0);
 
         /* Send ACKs by default */
-        SetAck(mpsse, ACK);
+        set_ack(mpsse, ACK);
 
         /* Ensure adaptive clock is disabled */
         setup_commands[setup_commands_size++] = DISABLE_ADAPTIVE_CLOCK;
@@ -404,7 +404,7 @@ int SetMode(struct mpsse_context *mpsse, int endianess)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int SetClock(struct mpsse_context *mpsse, uint32_t freq)
+int set_clock(struct mpsse_context *mpsse, uint32_t freq)
 {
     int retval = MPSSE_FAIL;
     uint32_t system_clock = 0;
@@ -413,7 +413,7 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
 
     /* Do not call is_valid_context() here, as the FTDI chip may not be
    * completely
-   * configured when SetClock is called */
+   * configured when set_clock is called */
     if (mpsse) {
         if (freq > SIX_MHZ) {
             buf[0] = TCK_X5;
@@ -451,7 +451,7 @@ int SetClock(struct mpsse_context *mpsse, uint32_t freq)
  *
  * Returns a pointer to the last error string.
  */
-const char *ErrorString(struct mpsse_context *mpsse)
+const char *error_string(struct mpsse_context *mpsse)
 {
     if (is_valid(mpsse)) {
         return ftdi_get_error_string(&mpsse->ftdi);
@@ -467,7 +467,7 @@ const char *ErrorString(struct mpsse_context *mpsse)
  *
  * Returns the existing clock rate in hertz.
  */
-int GetClock(struct mpsse_context *mpsse)
+int get_clock(struct mpsse_context *mpsse)
 {
     int clock = 0;
 
@@ -485,7 +485,7 @@ int GetClock(struct mpsse_context *mpsse)
  *
  * Returns the integer value of the vendor ID.
  */
-int GetVid(struct mpsse_context *mpsse)
+int get_vid(struct mpsse_context *mpsse)
 {
     int vid = 0;
 
@@ -503,7 +503,7 @@ int GetVid(struct mpsse_context *mpsse)
  *
  * Returns the integer value of the product ID.
  */
-int GetPid(struct mpsse_context *mpsse)
+int get_pid(struct mpsse_context *mpsse)
 {
     int pid = 0;
 
@@ -521,7 +521,7 @@ int GetPid(struct mpsse_context *mpsse)
  *
  * Returns the description of the FTDI chip.
  */
-const char *GetDescription(struct mpsse_context *mpsse)
+const char *get_description(struct mpsse_context *mpsse)
 {
     const char *description = NULL;
 
@@ -541,7 +541,7 @@ const char *GetDescription(struct mpsse_context *mpsse)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int SetLoopback(struct mpsse_context *mpsse, int enable)
+int set_loopback(struct mpsse_context *mpsse, int enable)
 {
     unsigned char buf[1] = { 0 };
     int retval = MPSSE_FAIL;
@@ -567,7 +567,7 @@ int SetLoopback(struct mpsse_context *mpsse, int enable)
  *
  * Returns void.
  */
-void SetCSIdle(struct mpsse_context *mpsse, int idle)
+void set_cs_idle(struct mpsse_context *mpsse, int idle)
 {
     if (is_valid(mpsse)) {
         if (idle > 0) {
@@ -596,7 +596,7 @@ void SetCSIdle(struct mpsse_context *mpsse, int idle)
  *
  * Returns void.
  */
-void FlushAfterRead(struct mpsse_context *mpsse, int tf)
+void flush_after_read(struct mpsse_context *mpsse, int tf)
 {
     if (is_valid(mpsse)) {
         mpsse->flush_after_read = tf;
@@ -613,7 +613,7 @@ void FlushAfterRead(struct mpsse_context *mpsse, int tf)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Start(struct mpsse_context *mpsse)
+int start(struct mpsse_context *mpsse)
 {
     int status = MPSSE_OK;
 
@@ -668,7 +668,7 @@ int Start(struct mpsse_context *mpsse)
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int WriteBits(struct mpsse_context *mpsse, char bits, int size)
+int write_bits(struct mpsse_context *mpsse, char bits, int size)
 {
     char data[8] = { 0 };
     int i = 0, retval = MPSSE_OK;
@@ -690,9 +690,9 @@ int WriteBits(struct mpsse_context *mpsse, char bits, int size)
     }
 
     /* Enable bit mode before writing, then disable it afterwards. */
-    EnableBitmode(mpsse, 1);
-    retval = Write(mpsse, data, size);
-    EnableBitmode(mpsse, 0);
+    enable_bit_mode(mpsse, 1);
+    retval = write_data(mpsse, data, size);
+    enable_bit_mode(mpsse, 0);
 
     return retval;
 }
@@ -707,7 +707,7 @@ int WriteBits(struct mpsse_context *mpsse, char bits, int size)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Write(struct mpsse_context *mpsse, char *data, int size)
+int write_data(struct mpsse_context *mpsse, char *data, int size)
 {
     unsigned char *buf = NULL;
     int retval = MPSSE_FAIL, buf_size = 0, txsize = 0, n = 0;
@@ -758,8 +758,8 @@ int Write(struct mpsse_context *mpsse, char *data, int size)
     return retval;
 }
 
-/* Performs a read. For internal use only; see Read() and ReadBits(). */
-char *InternalRead(struct mpsse_context *mpsse, int size)
+/* Performs a read. For internal use only; see read_data() and read_bits(). */
+static char *internal_read(struct mpsse_context *mpsse, int size)
 {
     unsigned char *data = NULL, *buf = NULL;
     unsigned char sbuf[SPI_RW_SIZE] = { 0 };
@@ -808,14 +808,14 @@ char *InternalRead(struct mpsse_context *mpsse, int size)
  * Returns NULL on failure.
  */
 #ifdef SWIGPYTHON
-swig_string_data Read(struct mpsse_context *mpsse, int size)
+swig_string_data read_data(struct mpsse_context *mpsse, int size)
 #else
-char *Read(struct mpsse_context *mpsse, int size)
+char *read_data(struct mpsse_context *mpsse, int size)
 #endif
 {
     char *buf = NULL;
 
-    buf = InternalRead(mpsse, size);
+    buf = internal_read(mpsse, size);
 
 #ifdef SWIGPYTHON
     swig_string_data sdata = { 0 };
@@ -835,7 +835,7 @@ char *Read(struct mpsse_context *mpsse, int size)
  *
  * Returns an 8-bit byte containing the read bits.
  */
-char ReadBits(struct mpsse_context *mpsse, int size)
+char read_bits(struct mpsse_context *mpsse, int size)
 {
     char bits = 0;
     char *rdata = NULL;
@@ -844,9 +844,9 @@ char ReadBits(struct mpsse_context *mpsse, int size)
         size = 8;
     }
 
-    EnableBitmode(mpsse, 1);
-    rdata = InternalRead(mpsse, size);
-    EnableBitmode(mpsse, 0);
+    enable_bit_mode(mpsse, 1);
+    rdata = internal_read(mpsse, size);
+    enable_bit_mode(mpsse, 0);
 
     if (rdata) {
         /* The last byte in rdata will have all the read bits set or unset as
@@ -887,9 +887,9 @@ char ReadBits(struct mpsse_context *mpsse, int size)
  * Returns NULL on failure.
  */
 #ifdef SWIGPYTHON
-swig_string_data Transfer(struct mpsse_context *mpsse, char *data, int size)
+swig_string_data transfer(struct mpsse_context *mpsse, char *data, int size)
 #else
-char *Transfer(struct mpsse_context *mpsse, char *data, int size)
+char *transfer(struct mpsse_context *mpsse, char *data, int size)
 #endif
 {
     unsigned char *txdata = NULL, *buf = NULL;
@@ -949,7 +949,7 @@ char *Transfer(struct mpsse_context *mpsse, char *data, int size)
  *
  * Returns either an ACK (0) or a NACK (1).
  */
-int GetAck(struct mpsse_context *mpsse)
+int get_ack(struct mpsse_context *mpsse)
 {
     int ack = 0;
 
@@ -968,7 +968,7 @@ int GetAck(struct mpsse_context *mpsse)
  *
  * Returns void.
  */
-void SetAck(struct mpsse_context *mpsse, int ack)
+void set_ack(struct mpsse_context *mpsse, int ack)
 {
     if (is_valid_context(mpsse)) {
         if (ack == NACK) {
@@ -988,7 +988,7 @@ void SetAck(struct mpsse_context *mpsse, int ack)
  *
  * Returns void.
  */
-void SendAcks(struct mpsse_context *mpsse) { return SetAck(mpsse, ACK); }
+void set_acks(struct mpsse_context *mpsse) { return set_ack(mpsse, ACK); }
 
 /*
  * Causes libmpsse to send NACKs after each read byte in I2C mode.
@@ -997,7 +997,7 @@ void SendAcks(struct mpsse_context *mpsse) { return SetAck(mpsse, ACK); }
  *
  * Returns void.
  */
-void SendNacks(struct mpsse_context *mpsse) { return SetAck(mpsse, NACK); }
+void set_nacks(struct mpsse_context *mpsse) { return set_ack(mpsse, NACK); }
 
 /*
  * Send data stop condition.
@@ -1007,7 +1007,7 @@ void SendNacks(struct mpsse_context *mpsse) { return SetAck(mpsse, NACK); }
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int Stop(struct mpsse_context *mpsse)
+int stop(struct mpsse_context *mpsse)
 {
     int retval = MPSSE_OK;
 
@@ -1044,7 +1044,7 @@ int Stop(struct mpsse_context *mpsse)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int PinHigh(struct mpsse_context *mpsse, int pin)
+int set_pin_high(struct mpsse_context *mpsse, int pin)
 {
     int retval = MPSSE_FAIL;
 
@@ -1064,7 +1064,7 @@ int PinHigh(struct mpsse_context *mpsse, int pin)
  * Returns MPSSE_OK on success.
  * Returns MPSSE_FAIL on failure.
  */
-int PinLow(struct mpsse_context *mpsse, int pin)
+int set_pin_low(struct mpsse_context *mpsse, int pin)
 {
     int retval = MPSSE_FAIL;
 
@@ -1083,7 +1083,7 @@ int PinLow(struct mpsse_context *mpsse, int pin)
  *
  * Returns MPSSE_OK if direction could be set, MPSSE_FAIL otherwise.
  */
-int SetDirection(struct mpsse_context *mpsse, uint8_t direction)
+int set_direction(struct mpsse_context *mpsse, uint8_t direction)
 {
     int retval = MPSSE_FAIL;
 
@@ -1106,7 +1106,7 @@ int SetDirection(struct mpsse_context *mpsse, uint8_t direction)
  *
  * Returns MPSSE_OK if direction could be set, MPSSE_FAIL otherwise.
  */
-int WritePins(struct mpsse_context *mpsse, uint8_t data)
+int write_pins(struct mpsse_context *mpsse, uint8_t data)
 {
     int retval = MPSSE_FAIL;
 
@@ -1128,7 +1128,7 @@ int WritePins(struct mpsse_context *mpsse, uint8_t data)
  *
  * Returns a byte with the corresponding pin's bits set to 1 or 0.
  */
-int ReadPins(struct mpsse_context *mpsse)
+int read_pins(struct mpsse_context *mpsse)
 {
     uint8_t val = 0;
 
@@ -1144,15 +1144,15 @@ int ReadPins(struct mpsse_context *mpsse)
  *
  * @mpsse - MPSSE context pointer.
  * @pin   - The pin number.
- * @state - The state of the pins, as returned by ReadPins.
- *          If set to -1, ReadPins will automatically be called.
+ * @state - The state of the pins, as returned by read_pins.
+ *          If set to -1, read_pins will automatically be called.
  *
  * Returns a 1 if the pin is high, 0 if the pin is low.
  */
-int PinState(struct mpsse_context *mpsse, int pin, int state)
+int pin_state(struct mpsse_context *mpsse, int pin, int state)
 {
     if (state == -1) {
-        state = ReadPins(mpsse);
+        state = read_pins(mpsse);
     }
 
     /* If not in bitbang mode, the specified pin should be one of GPIOLx.
@@ -1172,11 +1172,11 @@ int PinState(struct mpsse_context *mpsse, int pin, int state)
  *
  * Returns MPSSE_OK on success, MPSSE_FAIL on failure.
  */
-int Tristate(struct mpsse_context *mpsse)
+int set_tristate(struct mpsse_context *mpsse)
 {
     unsigned char cmd[CMD_SIZE] = { 0 };
 
-    /* Tristate the all I/O pins (FT232H only) */
+    /* set_tristate the all I/O pins (FT232H only) */
     cmd[0] = TRISTATE_IO;
     cmd[1] = 0xFF;
     cmd[2] = 0xFF;
@@ -1188,7 +1188,7 @@ int Tristate(struct mpsse_context *mpsse)
  * Returns the libmpsse version number.
  * High nibble is major version, low nibble is minor version.
  */
-char Version(void)
+char version(void)
 {
     int major = 0, minor = 0;
     char version = 0, *version_string = NULL, *decimal_ptr = NULL;

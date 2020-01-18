@@ -29,7 +29,7 @@ MPSSE FUNCTIONS
 		Returns void.
 
 
-	char *MPSSE.ErrorString(struct mpsse_context *mpsse)
+	char *MPSSE.error_string(struct mpsse_context *mpsse)
 
 		Get the last error string as reported by libftdi. This data should not be freed by the caller.
 
@@ -38,7 +38,7 @@ MPSSE FUNCTIONS
 		Returns a pointer to the last error string reported by libftdi.
 
 
-	int MPSSE.GetVid(struct mpsse_context *mpsse)
+	int MPSSE.get_vid(struct mpsse_context *mpsse)
 
 		Get the USB vendor ID of the connected FTDI device.
 
@@ -47,7 +47,7 @@ MPSSE FUNCTIONS
 		Returns the FTDI vendor ID.
 
 
-	int MPSSE.GetPid(struct mpsse_context *mpsse)
+	int MPSSE.get_pid(struct mpsse_context *mpsse)
 
 		Get the USB product ID of the connected FTDI device.
 
@@ -56,7 +56,7 @@ MPSSE FUNCTIONS
 		Returns the FTDI product ID.
 
 
-	char *MPSSE.GetDescription(struct mpsse_context *mpsse)
+	char *MPSSE.get_description(struct mpsse_context *mpsse)
 
 		Get the description, as listed in the internal supported_devices structure, of the connected FTDI device.
 		The caller must not free the return value.
@@ -65,7 +65,7 @@ MPSSE FUNCTIONS
 
 		Returns a pointer to the device description string.
 
-	int MPSSE.GetClock(struct mpsse_context *mpsse)
+	int MPSSE.get_clock(struct mpsse_context *mpsse)
 
 		Gets the currently configured clock frequency.
 
@@ -74,7 +74,7 @@ MPSSE FUNCTIONS
 		Returns an unsigned 32 bit value representing the clock frequency.
 
 
-	int MPSSE.SetClock(struct mpsse_context *mpsse, int freq)
+	int MPSSE.set_clock(struct mpsse_context *mpsse, int freq)
 
 		Sets the appropriate divisor for the desired clock frequency.
 		Called internally by Open().
@@ -86,7 +86,7 @@ MPSSE FUNCTIONS
 		Returns MPSSE_FAIL on failure.
 
 
-	int MPSSE.SetMode(struct mpsse_context *mpsse, enum modes mode, int endianess)
+	int MPSSE.set_mode(struct mpsse_context *mpsse, enum modes mode, int endianess)
 
 		Sets the appropriate transmit and receive commands based on the requested mode and byte order.
 		Called internally by Open().
@@ -99,10 +99,10 @@ MPSSE FUNCTIONS
 		Returns MPSSE_FAIL on failure.
 
 
-	int MPSSE.SetLoopback(struct mpsse_context *mpsse, int enable)
+	int MPSSE.set_loopback(struct mpsse_context *mpsse, int enable)
 
 		Enable / disable internal loopback.
-		Called internally by SetMode().
+		Called internally by set_mode().
 
 		@mpsse  - MPSSE context pointer.
 		@enable - Zero to disable the FTDI internal loopback, 1 to enable loopback.
@@ -114,7 +114,7 @@ MPSSE FUNCTIONS
 SPI FUNCTIONS
 
 
-	int MPSSE.SPI.Start(struct mpsse_context *mpsse)
+	int MPSSE.SPI.start(struct mpsse_context *mpsse)
 
                 Asserts the chip select pin.
 
@@ -124,7 +124,7 @@ SPI FUNCTIONS
                 Returns MPSSE_FAIL on failure.
 
 
-	int MPSSE.SPI.Stop(struct mpsse_context *mpsse)
+	int MPSSE.SPI.stop(struct mpsse_context *mpsse)
 
                 Deasserts the chip select pin.
 
@@ -134,7 +134,7 @@ SPI FUNCTIONS
                 Returns MPSSE_FAIL on failure.
 
 
-	char *MPSSE.SPI.Read(struct mpsse_context *mpsse, int size)
+	char *MPSSE.SPI.read_data(struct mpsse_context *mpsse, int size)
 
                 Reads SPI data.
 
@@ -145,7 +145,7 @@ SPI FUNCTIONS
                 Returns NULL on failure.
 
 
-        int MPSSE.SPI.Write(struct mpsse_context *mpsse, char *data, int size)
+        int MPSSE.SPI.write_data(struct mpsse_context *mpsse, char *data, int size)
 
                 Writes SPI data.
 
@@ -157,7 +157,7 @@ SPI FUNCTIONS
                 Returns MPSSE_FAIL on failure.
 
 
-	char *MPSSE.SPI.Transfer(struct mpsse_context *mpsse, char *outbuf, int size)
+	char *MPSSE.SPI.transfer(struct mpsse_context *mpsse, char *outbuf, int size)
 
 		Performs a bi-directional data transfer of size bytes.
 
@@ -172,7 +172,7 @@ SPI FUNCTIONS
 I2C FUNCTIONS
 
 
-	int MPSSE.I2C.GetAck(struct mpsse_context *mpsse)
+	int MPSSE.I2C.get_ack((struct mpsse_context *mpsse)
 
 		Return the status of the last received acknolwedgement bit.
 
@@ -182,9 +182,9 @@ I2C FUNCTIONS
 		Returns 1 if a NACK was received.
 
 
-	void MPSSE.I2C.SetAck(struct mpsse_context *mpsse, int ack)
+	void MPSSE.I2C.set_ack((struct mpsse_context *mpsse, int ack)
 
-		Set the ACK bit to send when Read() receives a byte from the I2C slave device.
+		Set the ACK bit to send when read_data() receives a byte from the I2C slave device.
 
 		@mpsse - MPSSE context pointer.
 		@ack   - Set to 0 to send ACKs (default).
@@ -193,7 +193,7 @@ I2C FUNCTIONS
 		Returns void.
 
 
-	void MPSSE.I2C.SendAcks(struct mpsse_context *mpsse)
+	void MPSSE.I2C.set_acks(struct mpsse_context *mpsse)
 	
 		Causes libmpsse to send ACKs after each read byte in I2C mode.
 
@@ -202,7 +202,7 @@ I2C FUNCTIONS
 		Returns void.
 
 
-	void MPSSE.I2C.SendNacks(struct mpsse_context *mpsse)
+	void MPSSE.I2C.set_nacks((struct mpsse_context *mpsse)
 
 		Causes libmpsse to send NACKs after each read byte in I2C mode.
 
@@ -213,7 +213,7 @@ I2C FUNCTIONS
 
 	
 
-	void SetCSIdle(struct mpsse_context *mpsse, int idle)
+	void set_cs_idle(struct mpsse_context *mpsse, int idle)
 
 		Set the idle state of the chip select pin. CS idles high by default.
 
@@ -223,11 +223,11 @@ I2C FUNCTIONS
 		Returns void.
 
 
-	int PinHigh(struct mpsse_context *mpsse, int pin)
+	int set_pin_high(struct mpsse_context *mpsse, int pin)
 
 		Set the specified GPIO pin high (1).
-		Note that the state of the GPOL pins can only be changed prior to a Start()
-		or after a Stop() condition is sent. 
+		Note that the state of the GPOL pins can only be changed prior to a start()
+		or after a stop() condition is sent. 
 
 		@mpsse - MPSSE context pointer.
 		@pin   - Pin number, one of: 0 - 11.
@@ -236,11 +236,11 @@ I2C FUNCTIONS
 		Returns MPSSE_FAIL on failure.
 
 
-	int PinLow(struct mpsse_context *mpsse, int pin)
+	int set_pin_low(struct mpsse_context *mpsse, int pin)
 
 		Set the specified GPIO pin low (0).
-		Note that the state of GPIO pins 0-3 can only be changed prior to a Start()
-		or after a Stop() condition is sent. 
+		Note that the state of GPIO pins 0-3 can only be changed prior to a start()
+		or after a stop() condition is sent. 
 
 		@mpsse - MPSSE context pointer.
 		@pin   - Pin number, one of: 0 - 11.
@@ -249,7 +249,7 @@ I2C FUNCTIONS
 		Returns MPSSE_FAIL on failure.
 
 
-	int ReadPins(struct mpsse_context *mpsse);
+	int read_pins(struct mpsse_context *mpsse);
 
 		Reads the state of the chip's pins.
 
@@ -258,14 +258,14 @@ I2C FUNCTIONS
 		Returns a byte with the corresponding pin's bits set to 1 or 0.
 
 
-	int PinState(struct mpsse_context *mpsse, int pin, int state)
+	int pin_state(struct mpsse_context *mpsse, int pin, int state)
 
 		Checks if a specific pin is high or low.
 
 		@mpsse - MPSSE context pointer.
 		@pin   - The pin number.
-		@state - The state of the pins, as returned by ReadPins.
-		         If set to -1, ReadPins will automatically be called.
+		@state - The state of the pins, as returned by read_pins.
+		         If set to -1, read_pins will automatically be called.
 		
 		Returns a 1 if the pin is high, 0 if the pin is low.
 
